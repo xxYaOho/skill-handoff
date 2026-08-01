@@ -1,3 +1,1 @@
-# Project
-
-## Tech Stack
+AGENTS.md
