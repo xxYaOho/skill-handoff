@@ -22,7 +22,7 @@ disable-model-invocation: true
 
 ## 撰写交接文档
 
-编写一份交接文档, 总结当前对话内容, 以便 fresh-agent 能够继续工作. 保存到 `$HANDOFF_DIR/YYMMDDhhmmss-<title>.md`, `<title>` 用 kebab-case, ASCII, 不超过 5 个词.
+编写一份交接文档, 总结当前对话内容, 以便 fresh-agent 能够继续工作. 执行 `scripts/handoff-add.sh -n <title>` 创建文档, 从 stdout 的 `HANDOFF_DOC` 拿到路径后再写入内容. 命名规格 (时间戳, kebab-case, ASCII, ≤5 词) 由脚本强制, 不要自行拼文件名; 标题起得好坏只看它能否概括下一阶段重点.
 
 在文档中包含一个"建议技能"部分, 列出代理应调用的技能建议. 只列出当前环境中确实存在的技能; 不确定时描述所需能力, 不要编造技能名.
 
@@ -43,7 +43,7 @@ disable-model-invocation: true
 一个完全没有本次会话上下文的 agent, 只读这份文档及其引用的文件, 能否不再追问用户就做对下一步? 不能, 就补齐缺失的部分.
 
 > 规则
-> - 交接文档通常不再二次编辑. 需要续写时沿用同个标题并加版本标记, 如 `YYMMDDhhmmss-<title>-V2.md`, 默认 V1 无标记.
+> - 交接文档通常不再二次编辑. 需要续写时沿用同个标题并加版本标记: `scripts/handoff-add.sh -n <title> -s V2`, 默认 V1 无标记.
 
 ## 更新 HANDOFF.md
 
@@ -108,7 +108,7 @@ disable-model-invocation: true
 
 ## 自检清单
 
-- [ ] 交接文档路径为 `.tmp/handoff/YYMMDDhhmmss-<kebab-title>.md`, 时间戳为年月日时分秒
+- [ ] 交接文档由 `handoff-add.sh` 创建, 路径来自其 `HANDOFF_DOC` 输出, 非手工拼接
 - [ ] 三个必答问题都回答了
 - [ ] 所有引用的路径 / commit 真实存在
 - [ ] 敏感信息已脱敏
