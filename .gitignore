@@ -50,3 +50,6 @@
 .sisyphus/
 .agents/skills
 .mcp.json
+
+# Eval workspace (skill-creator runs)
+yes-handoff-workspace/
