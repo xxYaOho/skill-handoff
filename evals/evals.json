@@ -8,14 +8,46 @@
       "expected_output": "在仓库内生成 HANDOFF.md 索引（含接手说明 blockquote）和 .tmp/handoff/YYMMDDhhmmss-<kebab>.md 交接文档；文档回答三个必答问题（否决方案/已验证 vs 推测/留给用户的决策），记录正则方案被否决及原因、segfault 环境坑；假 API key 被脱敏；全局动态 ≤400 字符。",
       "files": [],
       "assertions": [
-        {"id": "e1-handoff-md-exists", "text": "HANDOFF.md 存在于仓库根且包含「接手说明」blockquote", "type": "script"},
-        {"id": "e1-doc-naming", "text": ".tmp/handoff/ 下存在匹配 YYMMDDhhmmss-<kebab-title>.md 的交接文档", "type": "script"},
-        {"id": "e1-apikey-redacted", "text": "假 API key (sk-test-FAKE1234567890abcdef) 不出现在任何产出文件中", "type": "script"},
-        {"id": "e1-status-400-chars", "text": "HANDOFF.md 全局动态（接手说明之后、首个课题组标题之前的正文）≤400 字符", "type": "script"},
-        {"id": "e1-rejected-approach", "text": "交接文档记录了正则解析方案被否决及其原因（嵌套配置解析错误），防止接手方重走死路", "type": "grader"},
-        {"id": "e1-verified-vs-speculation", "text": "交接文档区分了已验证结论（pnpm test 全绿）与未验证推测（AST 大文件性能），推测被明确标注", "type": "grader"},
-        {"id": "e1-env-gotcha", "text": "交接文档把环境坑（node --experimental-strip-types 段错误、必须用 tsx）传递给接手方", "type": "grader"},
-        {"id": "e1-next-focus", "text": "交接文档体现了用户传入的下一阶段重点：给解析器补边界情况的测试", "type": "grader"}
+        {
+          "id": "e1-handoff-md-exists",
+          "text": "HANDOFF.md 存在于仓库根且包含「接手说明」blockquote",
+          "type": "script"
+        },
+        {
+          "id": "e1-doc-naming",
+          "text": ".tmp/handoff/ 下存在匹配 YYMMDDhhmmss-<kebab-title>.md 的交接文档",
+          "type": "script"
+        },
+        {
+          "id": "e1-apikey-redacted",
+          "text": "假 API key (sk-test-FAKE1234567890abcdef) 不出现在任何产出文件中",
+          "type": "script"
+        },
+        {
+          "id": "e1-status-400-chars",
+          "text": "HANDOFF.md 全局动态（接手说明之后、首个课题组标题之前的正文）≤400 字符",
+          "type": "script"
+        },
+        {
+          "id": "e1-rejected-approach",
+          "text": "交接文档记录了正则解析方案被否决及其原因（嵌套配置解析错误），防止接手方重走死路",
+          "type": "grader"
+        },
+        {
+          "id": "e1-verified-vs-speculation",
+          "text": "交接文档区分了已验证结论（pnpm test 全绿）与未验证推测（AST 大文件性能），推测被明确标注",
+          "type": "grader"
+        },
+        {
+          "id": "e1-env-gotcha",
+          "text": "交接文档把环境坑（node --experimental-strip-types 段错误、必须用 tsx）传递给接手方",
+          "type": "grader"
+        },
+        {
+          "id": "e1-next-focus",
+          "text": "交接文档体现了用户传入的下一阶段重点：给解析器补边界情况的测试",
+          "type": "grader"
+        }
       ]
     },
     {
@@ -25,13 +57,41 @@
       "expected_output": "HANDOFF.md 展开为全局动态 + T1/T2 课题组结构（每个插件一个课题组）；接手说明 blockquote 原样保留；过时的旧全局动态被整段重写；SSE 流式方案否决被记录；采样率问题标注为未验证；交接文档落在 .tmp/handoff/。",
       "files": [],
       "assertions": [
-        {"id": "e2-topic-groups", "text": "HANDOFF.md 展开为全局动态 + 两个课题组（## T1: / ## T2: 标题）", "type": "script"},
-        {"id": "e2-blockquote-preserved", "text": "接手说明 blockquote 原样保留，未被改写或删除", "type": "script"},
-        {"id": "e2-stale-rewritten", "text": "过时的旧全局动态（gemmadict 选型阶段/talk-to-me 未启动）被整段重写，不再残留", "type": "script"},
-        {"id": "e2-handoff-dir", "text": "交接文档落在 .tmp/handoff/ 目录", "type": "script"},
-        {"id": "e2-sse-rejected", "text": "SSE chunked 流式方案被否决及原因有记录", "type": "grader"},
-        {"id": "e2-sample-rate-unverified", "text": "采样率问题（48kHz vs 16kHz）被标注为未验证的怀疑，而非结论", "type": "grader"},
-        {"id": "e2-global-not-duplicated", "text": "全局动态只写跨课题组信息，不与课题组内容重复", "type": "grader"}
+        {
+          "id": "e2-topic-groups",
+          "text": "HANDOFF.md 展开为全局动态 + 两个课题组（## T1: / ## T2: 标题）",
+          "type": "script"
+        },
+        {
+          "id": "e2-blockquote-preserved",
+          "text": "接手说明 blockquote 原样保留，未被改写或删除",
+          "type": "script"
+        },
+        {
+          "id": "e2-stale-rewritten",
+          "text": "过时的旧全局动态（gemmadict 选型阶段/talk-to-me 未启动）被整段重写，不再残留",
+          "type": "script"
+        },
+        {
+          "id": "e2-handoff-dir",
+          "text": "交接文档落在 .tmp/handoff/ 目录",
+          "type": "script"
+        },
+        {
+          "id": "e2-sse-rejected",
+          "text": "SSE chunked 流式方案被否决及原因有记录",
+          "type": "grader"
+        },
+        {
+          "id": "e2-sample-rate-unverified",
+          "text": "采样率问题（48kHz vs 16kHz）被标注为未验证的怀疑，而非结论",
+          "type": "grader"
+        },
+        {
+          "id": "e2-global-not-duplicated",
+          "text": "全局动态只写跨课题组信息，不与课题组内容重复",
+          "type": "grader"
+        }
       ]
     },
     {
@@ -41,10 +101,26 @@
       "expected_output": "worktree 的 .tmp/handoff 是指向主仓库的 symlink；交接文档实际落在主仓库；HANDOFF.md 创建在主仓库根；交接文档说明工作在 worktree/分支上且存在未提交改动。",
       "files": [],
       "assertions": [
-        {"id": "e3-symlink", "text": "worktree 的 .tmp/handoff 是指向主仓库 .tmp/handoff 的 symlink", "type": "script"},
-        {"id": "e3-doc-in-main", "text": "交接文档实际文件落在主仓库的 .tmp/handoff/ 下", "type": "script"},
-        {"id": "e3-index-in-main", "text": "HANDOFF.md 创建/更新在主仓库根目录", "type": "script"},
-        {"id": "e3-worktree-context", "text": "交接文档说明工作在 worktree 的 feature/login-style 分支上，且 src/login.ts 有未提交改动，接手方知道去哪找", "type": "grader"}
+        {
+          "id": "e3-symlink",
+          "text": "worktree 的 .tmp/handoff 是指向主仓库 .tmp/handoff 的 symlink",
+          "type": "script"
+        },
+        {
+          "id": "e3-doc-in-main",
+          "text": "交接文档实际文件落在主仓库的 .tmp/handoff/ 下",
+          "type": "script"
+        },
+        {
+          "id": "e3-index-in-main",
+          "text": "HANDOFF.md 创建在 workspace (worktree) 根目录（P1 裁决: 索引随 worktree 是设计行为, 文档经软链存活于主仓库即可）",
+          "type": "script"
+        },
+        {
+          "id": "e3-worktree-context",
+          "text": "交接文档说明工作在 worktree 的 feature/login-style 分支上，且 src/login.ts 有未提交改动，接手方知道去哪找",
+          "type": "grader"
+        }
       ]
     }
   ]
