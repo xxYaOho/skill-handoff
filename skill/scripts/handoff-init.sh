@@ -22,7 +22,7 @@ set -eu
 die()  { printf 'handoff-init: %s\n' "$1" >&2; exit 1; }
 warn() { printf 'handoff-init: %s\n' "$1" >&2; }
 
-abspath() { (cd "$1" 2>/dev/null && pwd); }
+abspath() { (cd "$1" 2>/dev/null && pwd -P); }
 
 find_marker_root() {
   dir=$(pwd)
@@ -66,6 +66,9 @@ IS_WORKTREE=false
 LINKED=false
 GIT_DIR=$(git rev-parse --absolute-git-dir 2>/dev/null || true)
 COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null || true)
+if [ -n "$GIT_DIR" ]; then
+  GIT_DIR=$(abspath "$GIT_DIR" || printf '')
+fi
 if [ -n "$COMMON_DIR" ]; then
   COMMON_DIR=$(abspath "$COMMON_DIR" || printf '')
 fi
