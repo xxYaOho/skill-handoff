@@ -3,6 +3,8 @@ name: "yes-handoff"
 description: "将当前对话浓缩成一份交接文件，由 fresh-agent 继续处理"
 argument-hint: "下一阶段的工作重点是什么?"
 disable-model-invocation: true
+metadata:
+  version: "0.1.1"
 ---
 
 # Yes! Handoff Work
