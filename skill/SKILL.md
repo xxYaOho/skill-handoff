@@ -11,18 +11,27 @@ metadata:
 
 维护上下文卫生, 创建和撰写全面的交接文档, 让 agent 在 new session 无缝继续完成工作, 零歧义.
 
-## 准备工作
+## Quick Start
 
-执行 `scripts/handoff-init.sh`. 它会解析工作区根目录, 处理 git worktree 子区的目录链接, 并在缺失时创建 HANDOFF.md. 从它的 stdout 读取:
+**1. 了解工作区**
 
-- `WORKSPACE_ROOT` — 工作区根目录
-- `HANDOFF_FILE` — 索引文件路径
-- `HANDOFF_DIR` — 交接文档存放目录
-- `CREATED_INDEX` — 本次是否新建了索引
+通过 `scripts/handoff-init.sh`. 从它的 stdout 读取以下信息:
+
+- `WORKSPACE_ROOT`: 工作区根目录
+- `HANDOFF_FILE`: 索引文件路径
+- `HANDOFF_DIR`: 交接文档存放目录
+- `CREATED_INDEX`: 本次是否新建了索引
 
 脚本失败时不要自行猜测路径, 把 stderr 原样告知用户后停止.
 
-## 撰写交接文档
+**2. 确认交接模式**
+
+从上下文中判断是轻量还是全量的交接模式. 若本次只是阶段性状态更新, 且 fresh-agent 仅凭动态文字就能续接, 或不需要接力时, 走轻量模式.
+
+- 轻量模式: 仅更新 `$HANDOFF_FILE` 的全局动态
+- 全量模式:  使用 `scripts/handoff-add.sh` 创建交接文档并写入内容; 更新 `$HANDOFF_FILE` 
+
+## Write Document
 
 编写一份交接文档, 总结当前对话内容, 以便 fresh-agent 能够继续工作. 执行 `scripts/handoff-add.sh -n <title>` 创建文档, 从 stdout 的 `HANDOFF_DOC` 拿到路径后再写入内容. 命名规格 (时间戳, kebab-case, ASCII, ≤5 词) 由脚本强制, 不要自行拼文件名; 标题起得好坏只看它能否概括下一阶段重点.
 
@@ -47,7 +56,7 @@ metadata:
 > 规则
 > - 交接文档通常不再二次编辑. 需要续写时沿用同个标题并加版本标记: `scripts/handoff-add.sh -n <title> -s V2`, 默认 V1 无标记.
 
-## 更新 HANDOFF.md
+## Update
 
 完成交接文档后, 更新 `$HANDOFF_FILE` 的全局动态, 附上交接文档链接.
 
@@ -62,8 +71,8 @@ metadata:
 > - 全局动态 ≤ 400 字符 (中文字符按 1 计, 含标点, 不含 Markdown 链接中的 URL). 自查代理: 超过两个自然段就是超了, 回去压缩.
 > - 删除的判据只有一条: 该描述是否还在说"现在". 工作已完成交付, 或已被后续交接覆盖, 就删掉.
 
-## 课题组
-*Topics Group*
+## Topics Group
+*课题组*
 
 当出现两条及以上**互不阻塞**的工作线时, 把 HANDOFF.md 展开为全局动态 + 若干课题组. 课题组数为 0 时即为基础形态 — 二者是同一结构的两种状态, 不是两套玩法.
 
@@ -108,7 +117,7 @@ metadata:
 [交接文档](.tmp/handoff/YYMMDDhhmmss-title.md)
 ```
 
-## 自检清单
+## TODO
 
 - [ ] 交接文档由 `handoff-add.sh` 创建, 路径来自其 `HANDOFF_DOC` 输出, 非手工拼接
 - [ ] 三个必答问题都回答了
