@@ -2,9 +2,9 @@
 name: "yes-handoff"
 description: "将当前对话浓缩成一份交接文件，由 fresh-agent 继续处理"
 argument-hint: "下一阶段的工作重点是什么?"
-disable-model-invocation: true
+# disable-model-invocation: true
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # Yes! Handoff Work
@@ -29,7 +29,7 @@ metadata:
 从上下文中判断是轻量还是全量的交接模式. 若本次只是阶段性状态更新, 且 fresh-agent 仅凭动态文字就能续接, 或不需要接力时, 走轻量模式.
 
 - 轻量模式: 仅更新 `$HANDOFF_FILE` 的全局动态
-- 全量模式:  使用 `scripts/handoff-add.sh` 创建交接文档并写入内容; 更新 `$HANDOFF_FILE` 
+- 全量模式: 使用 `scripts/handoff-add.sh` 创建交接文档并写入内容; 更新 `$HANDOFF_FILE`
 
 ## Write Document
 
@@ -54,6 +54,7 @@ metadata:
 一个完全没有本次会话上下文的 agent, 只读这份文档及其引用的文件, 能否不再追问用户就做对下一步? 不能, 就补齐缺失的部分.
 
 > 规则
+>
 > - 交接文档通常不再二次编辑. 需要续写时沿用同个标题并加版本标记: `scripts/handoff-add.sh -n <title> -s V2`, 默认 V1 无标记.
 
 ## Update
@@ -67,12 +68,14 @@ metadata:
 内容至少回答三件事: 整体处在什么阶段; 最近一次交接改变了什么; 下一步方向与当前阻塞. 每一句都可以挂交接文档链接.
 
 > 规则
+>
 > - 顶部的接手说明 blockquote 不属于全局动态. 任何情况下都不要改写或删除它 — 它是接手方唯一的协议来源.
 > - 全局动态 ≤ 400 字符 (中文字符按 1 计, 含标点, 不含 Markdown 链接中的 URL). 自查代理: 超过两个自然段就是超了, 回去压缩.
 > - 删除的判据只有一条: 该描述是否还在说"现在". 工作已完成交付, 或已被后续交接覆盖, 就删掉.
 
 ## Topics Group
-*课题组*
+
+_课题组_
 
 当出现两条及以上**互不阻塞**的工作线时, 把 HANDOFF.md 展开为全局动态 + 若干课题组. 课题组数为 0 时即为基础形态 — 二者是同一结构的两种状态, 不是两套玩法.
 
