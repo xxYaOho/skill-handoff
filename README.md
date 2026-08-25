@@ -9,7 +9,6 @@
 ```bash
 git clone https://github.com/xxYaOho/skill-handoff.git
 cd skill-handoff
-
 mkdir -p ~/.agents/skills
 ln -s "$(pwd)/skill" ~/.agents/skills/yes-handoff
 ```
