@@ -1,16 +1,17 @@
 {
   "skill_name": "yes-handoff",
+  "notes": "目标行为对齐 2026-10 讨论：收尾必轻量、课题组接手 ASK、链接位硬规则、交付≠归档（课题长期活跃）。e4–e6 依赖 skill 落地后才易 PASS；跑前将 files 中的夹具复制为工作区根 HANDOFF.md（e2/e5/e6）。",
   "evals": [
     {
       "id": 1,
       "name": "basic-handoff",
       "prompt": "你在当前这个 git 仓库工作。这一会话我们做了这些：把配置解析器从正则方案重写成了 AST 方案（src/parser.ts），正则方案已经废弃——嵌套配置它会解析错，不要走回头路。pnpm test 现在全绿（2 个测试通过）。AST 方案在大文件上的性能还没测过，只是怀疑可能会慢。注意：这台机器上 node --experimental-strip-types 会段错误，跑 TS 必须用 tsx。调试的时候用过 OPENAI_API_KEY=sk-test-FAKE1234567890abcdef（测试用的假 key）。src/cli.ts 是写了一半的 CLI 入口，还没提交。上下文快满了，帮我做个工作交接，下一阶段重点是给解析器补边界情况的测试。",
-      "expected_output": "在仓库内生成 HANDOFF.md 索引（含接手说明 blockquote）和 .tmp/handoff/YYMMDDhhmmss-<kebab>.md 交接文档；文档回答三个必答问题（否决方案/已验证 vs 推测/留给用户的决策），记录正则方案被否决及原因、segfault 环境坑；假 API key 被脱敏；全局动态 ≤400 字符。",
+      "expected_output": "全量交接：HANDOFF.md（含接手说明 blockquote）+ .tmp/handoff/ 交接文档；文档含否决/已验证·推测/待用户决策（建议固定小节）；假 key 脱敏；全局动态 ≤400 字；交接链若出现则在全局动态之后独行。",
       "files": [],
       "assertions": [
         {
           "id": "e1-handoff-md-exists",
-          "text": "HANDOFF.md 存在于仓库根且包含「接手说明」blockquote",
+          "text": "HANDOFF.md 存在于仓库根且包含接手说明 blockquote",
           "type": "script"
         },
         {
@@ -30,22 +31,27 @@
         },
         {
           "id": "e1-rejected-approach",
-          "text": "交接文档记录了正则解析方案被否决及其原因（嵌套配置解析错误），防止接手方重走死路",
+          "text": "交接文档记录了正则解析方案被否决及其原因（嵌套配置解析错误）",
           "type": "grader"
         },
         {
           "id": "e1-verified-vs-speculation",
-          "text": "交接文档区分了已验证结论（pnpm test 全绿）与未验证推测（AST 大文件性能），推测被明确标注",
+          "text": "交接文档区分已验证（pnpm test 全绿）与未验证推测（AST 大文件性能），推测被明确标注",
           "type": "grader"
         },
         {
           "id": "e1-env-gotcha",
-          "text": "交接文档把环境坑（node --experimental-strip-types 段错误、必须用 tsx）传递给接手方",
+          "text": "交接文档传递环境坑：node --experimental-strip-types 段错误、必须用 tsx",
           "type": "grader"
         },
         {
           "id": "e1-next-focus",
-          "text": "交接文档体现了用户传入的下一阶段重点：给解析器补边界情况的测试",
+          "text": "交接文档体现下一阶段重点：给解析器补边界情况的测试",
+          "type": "grader"
+        },
+        {
+          "id": "e1-bluf-or-sections",
+          "text": "交接文档结论可扫：有 BLUF（现在/下一步/阻塞）或固定小节（否决 / 已验证·推测 / 待用户决定），而非纯流水纪要",
           "type": "grader"
         }
       ]
@@ -53,29 +59,41 @@
     {
       "id": 2,
       "name": "monorepo-topics",
-      "prompt": "你在当前这个 Raycast 插件 monorepo 工作（plugins/gemmadict 和 plugins/talk-to-me 两个独立插件）。这次会话推进了两件互不依赖的事：1) gemmadict：本地模型服务（LM Studio）接入完成，翻译命令可用，npm run build 通过；云端 API 的流式输出试过 SSE chunked 解析，坑太多放弃了，改成一次性响应。2) talk-to-me：录音转写的 whisper.cpp 集成还没跑通，疑似是采样率转换问题（录音 48kHz，whisper 要 16kHz），但还没验证。仓库根有个 HANDOFF.md，是上次交接留下的，内容已经过时。帮我交接一下当前工作。",
-      "expected_output": "HANDOFF.md 展开为全局动态 + T1/T2 课题组结构（每个插件一个课题组）；接手说明 blockquote 原样保留；过时的旧全局动态被整段重写；SSE 流式方案否决被记录；采样率问题标注为未验证；交接文档落在 .tmp/handoff/。",
-      "files": [],
+      "prompt": "你在当前这个 Raycast 插件 monorepo 工作（plugins/gemmadict 和 plugins/talk-to-me 两个独立插件）。仓库根已有过时的 HANDOFF.md（夹具 e2-stale-HANDOFF.md，请先置于仓库根为 HANDOFF.md）。这次会话推进了两件互不依赖的事：1) gemmadict：本地模型服务（LM Studio）接入完成，翻译命令可用，npm run build 通过；云端 API 的流式输出试过 SSE chunked 解析，坑太多放弃了，改成一次性响应。2) talk-to-me：录音转写的 whisper.cpp 集成还没跑通，疑似是采样率转换问题（录音 48kHz，whisper 要 16kHz），但还没验证。帮我交接一下当前工作。",
+      "expected_output": "展开为全局动态 + T1/T2；blockquote 保留；旧动态整段重写；每组正文短（现在/下一步/阻塞）；每组至多一条当前交接链且独行于正文下；SSE 否决与采样率未验证有记录。",
+      "files": [
+        "evals/files/e2-stale-HANDOFF.md"
+      ],
       "assertions": [
         {
           "id": "e2-topic-groups",
-          "text": "HANDOFF.md 展开为全局动态 + 两个课题组（## T1: / ## T2: 标题）",
+          "text": "HANDOFF.md 展开为全局动态 + 两个课题组（## T1: / ## T2:）",
           "type": "script"
         },
         {
           "id": "e2-blockquote-preserved",
-          "text": "接手说明 blockquote 原样保留，未被改写或删除",
+          "text": "接手说明 blockquote 仍存在且未被删成空（允许与 init 模板等价的小幅空白规范化，不得改写行动协议含义）",
           "type": "script"
         },
         {
           "id": "e2-stale-rewritten",
-          "text": "过时的旧全局动态（gemmadict 选型阶段/talk-to-me 未启动）被整段重写，不再残留",
+          "text": "过时表述（gemmadict 选型阶段 / talk-to-me 尚未启动）不再出现在全局动态",
           "type": "script"
         },
         {
           "id": "e2-handoff-dir",
-          "text": "交接文档落在 .tmp/handoff/ 目录",
+          "text": "交接文档落在 .tmp/handoff/",
           "type": "script"
+        },
+        {
+          "id": "e2-link-placement",
+          "text": "每个课题组：交接文档 Markdown 链接独行位于该组正文之后；组正文内不含 .tmp/handoff/ 链接；每组「当前」交接链至多 1 条",
+          "type": "script"
+        },
+        {
+          "id": "e2-topic-body-brief",
+          "text": "每个课题组正文可扫（宜含现在/下一步/阻塞或等价短句），不是会话纪要墙",
+          "type": "grader"
         },
         {
           "id": "e2-sse-rejected",
@@ -84,12 +102,12 @@
         },
         {
           "id": "e2-sample-rate-unverified",
-          "text": "采样率问题（48kHz vs 16kHz）被标注为未验证的怀疑，而非结论",
+          "text": "采样率问题标注为未验证怀疑，而非结论",
           "type": "grader"
         },
         {
           "id": "e2-global-not-duplicated",
-          "text": "全局动态只写跨课题组信息，不与课题组内容重复",
+          "text": "全局动态只写跨组信息，不与课题组正文重复堆砌",
           "type": "grader"
         }
       ]
@@ -98,7 +116,7 @@
       "id": 3,
       "name": "worktree-linking",
       "prompt": "你在当前目录工作，这是主仓库的一个 linked git worktree（分支 feature/login-style）。这次会话把登录页按钮样式改完了（src/login.ts，改动还没提交）。做得差不多了，交接一下，剩下的让下个人收尾。",
-      "expected_output": "worktree 的 .tmp/handoff 是指向主仓库的 symlink；交接文档实际落在主仓库；HANDOFF.md 创建在主仓库根；交接文档说明工作在 worktree/分支上且存在未提交改动。",
+      "expected_output": "worktree 的 .tmp/handoff 为指向主仓的 symlink；交接文档落在主仓；HANDOFF.md 在 worktree 根；文档说明分支与未提交改动。",
       "files": [],
       "assertions": [
         {
@@ -108,17 +126,108 @@
         },
         {
           "id": "e3-doc-in-main",
-          "text": "交接文档实际文件落在主仓库的 .tmp/handoff/ 下",
+          "text": "交接文档实际文件落在主仓库 .tmp/handoff/",
           "type": "script"
         },
         {
           "id": "e3-index-in-main",
-          "text": "HANDOFF.md 创建在 workspace (worktree) 根目录（P1 裁决: 索引随 worktree 是设计行为, 文档经软链存活于主仓库即可）",
+          "text": "HANDOFF.md 创建在 workspace (worktree) 根目录（索引随 worktree；文档经软链落主仓）",
           "type": "script"
         },
         {
           "id": "e3-worktree-context",
-          "text": "交接文档说明工作在 worktree 的 feature/login-style 分支上，且 src/login.ts 有未提交改动，接手方知道去哪找",
+          "text": "交接文档说明工作在 feature/login-style worktree，且 src/login.ts 有未提交改动",
+          "type": "grader"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "light-close-required",
+      "prompt": "你在当前 git 仓库工作。仓库根已有 HANDOFF.md（若无则先 init）。本会话把登录页主按钮色改完了，用户已验收通过，改动已提交。用户说：「先这样，今天到这里，不需要交接给别人续做。」请做收尾。",
+      "expected_output": "必须走轻量收尾：重写 HANDOFF.md 全局动态以反映「现在」（本轮已交付/可停）；不创建新的 .tmp/handoff/ 交接文档（或证明本次未 handoff-add）；不因「不需要接力」而跳过索引更新。",
+      "files": [],
+      "assertions": [
+        {
+          "id": "e4-index-updated",
+          "text": "HANDOFF.md 全局动态被更新，能看出本轮登录按钮改动已交付/收尾，而非仍写「进行中」的过期状态",
+          "type": "grader"
+        },
+        {
+          "id": "e4-no-full-doc",
+          "text": "本次未新建交接文档（轻量模式：无新的 .tmp/handoff/* 文件，或时间戳不落在本轮）",
+          "type": "script"
+        },
+        {
+          "id": "e4-global-400",
+          "text": "更新后全局动态 ≤400 字符",
+          "type": "script"
+        },
+        {
+          "id": "e4-not-skip",
+          "text": "没有把「不需要接力」理解成可以不碰 HANDOFF.md",
+          "type": "grader"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "topic-resume-ask",
+      "prompt": "仓库根已有多课题组 HANDOFF.md（夹具 e5-topics-HANDOFF.md，请先置于仓库根为 HANDOFF.md；.tmp/handoff/ 中对应交接文档可为空占位）。这是一个新会话，上下文几乎没有有效信息。用户只说：/handoff",
+      "expected_output": "进入接力/接手：在复验或深读各组交接文档之前，先用 AskUserQuestion（或宿主等价 ASK）列出 T1/T2 一句话选项，并提供「只看全局 / 我自己说」类出口；不得未询问就选定课题并开工。",
+      "files": [
+        "evals/files/e5-topics-HANDOFF.md"
+      ],
+      "assertions": [
+        {
+          "id": "e5-ask-before-deep",
+          "text": "在深读 .tmp/handoff/ 交接文档或开始复验某一组之前，已向用户询问要跟进哪条课题",
+          "type": "grader"
+        },
+        {
+          "id": "e5-options-cover-topics",
+          "text": "询问选项覆盖 T1、T2，且各有一句话描述；含只看全局或用户自述出口",
+          "type": "grader"
+        },
+        {
+          "id": "e5-no-autostart",
+          "text": "在用户作出选择前，没有自行开工实现或修改代码",
+          "type": "grader"
+        },
+        {
+          "id": "e5-no-archive-nudge",
+          "text": "询问焦点是跟进哪条活跃课题，而不是催促归档",
+          "type": "grader"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "delivery-keeps-topic-alive",
+      "prompt": "仓库根已有 HANDOFF.md（夹具 e6-delivered-HANDOFF.md，请先置于仓库根）。T1 model-router 本轮 v0.17 已交付验收。用户说：「本轮可以收了，帮我更新一下 handoff。下一波还没想好，课题先留着。」",
+      "expected_output": "轻量或全量均可，但课题组 T1 保持活跃叙事：不写「待归档」、不主动提议归档、不删除 T1 节；正文反映本轮已交付且下一步等用户定下一波。",
+      "files": [
+        "evals/files/e6-delivered-HANDOFF.md"
+      ],
+      "assertions": [
+        {
+          "id": "e6-topic-remains",
+          "text": "HANDOFF.md 仍含 ## T1: model-router（或等价 T1 标题），未被删除",
+          "type": "script"
+        },
+        {
+          "id": "e6-no-pending-archive",
+          "text": "产出中不出现「待归档」或把交付等同于课题结束的措辞",
+          "type": "script"
+        },
+        {
+          "id": "e6-no-archive-propose",
+          "text": "agent 未主动提议执行归档（除非用户本轮明确要求归档）",
+          "type": "grader"
+        },
+        {
+          "id": "e6-next-waits-user",
+          "text": "动态表明下一波焦点等用户决定，课题仍可继续跟进",
           "type": "grader"
         }
       ]
