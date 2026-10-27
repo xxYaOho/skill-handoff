@@ -8,6 +8,9 @@
 #   IS_WORKTREE=true|false     current workspace is a linked git worktree
 #   LINKED=true|false          HANDOFF_DIR is a symlink to the main worktree
 #   CREATED_INDEX=true|false   HANDOFF.md was created by this run
+#   INDEX_VERSION=<x.y|none>   handoff-version from frontmatter (after upgrade)
+#   PROTOCOL_VERSION=<x.y>     skill protocol version this script ships
+#   UPGRADED=true|false        blockquote/frontmatter refreshed this run
 #
 # Diagnostics go to stderr. Exit code is non-zero on failure.
 #
@@ -23,6 +26,12 @@ die()  { printf 'handoff-init: %s\n' "$1" >&2; exit 1; }
 warn() { printf 'handoff-init: %s\n' "$1" >&2; }
 
 abspath() { (cd "$1" 2>/dev/null && pwd -P); }
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+PROTOCOL_VERSION=$(tr -d ' \t\r\n' < "$SCRIPT_DIR/PROTOCOL_VERSION")
+TEMPLATE="$SCRIPT_DIR/templates/blockquote.md"
+[ -n "$PROTOCOL_VERSION" ] || die "PROTOCOL_VERSION is empty"
+[ -f "$TEMPLATE" ] || die "missing blockquote template"
 
 find_marker_root() {
   dir=$(pwd)
@@ -93,20 +102,40 @@ else
   mkdir -p "$HANDOFF_DIR"
 fi
 
-# --- 4. create the index if absent (never overwrite) ----------------------
+# --- 4. create the index if absent (never overwrite body via create) ------
 CREATED_INDEX=false
+UPGRADED=false
+INDEX_VERSION=none
+
 if [ ! -f "$HANDOFF_FILE" ]; then
-  cat > "$HANDOFF_FILE" <<'INDEX'
-# Handoff Kanban
-
-> [!IMPORTANT]
-> 1. 从下方全局动态及关联文档恢复工作状态，并派遣子代理（explore @haiku）对照工作区复验; 存在 ≥2 个课题组时，先用 AskUserQuestion（代号 + 一句话；含「只看全局 / 我自己说」）确认要跟进哪条，再复验该组. 不要催归档.
-> 2. 向用户简要说明当前状态与下一步，若引用的 commit、分支或文件已失效，或工作区存在文档未记录的改动，明确指出差异
-> 3. 汇报后进入待命状态, 等待下一步安排
-
-(暂无动态)
-INDEX
+  {
+    printf '%s\n' '---'
+    printf 'handoff-version: %s\n' "$PROTOCOL_VERSION"
+    printf '%s\n' '---'
+    printf '\n'
+    printf '%s\n' '# Handoff Kanban'
+    printf '\n'
+    cat "$TEMPLATE"
+    printf '\n'
+    printf '%s\n' '(暂无动态)'
+  } > "$HANDOFF_FILE"
   CREATED_INDEX=true
+  INDEX_VERSION=$PROTOCOL_VERSION
+  UPGRADED=false
+else
+  # existing index: mechanical protocol upgrade when stale
+  upgrade_out=$("$SCRIPT_DIR/handoff-upgrade.sh" "$HANDOFF_FILE") || die "handoff-upgrade failed"
+  # re-print select keys from upgrade; also keep full parse
+  INDEX_VERSION=$(printf '%s\n' "$upgrade_out" | awk -F= '/^INDEX_VERSION=/{print $2; exit}')
+  PROTO_FROM_UP=$(printf '%s\n' "$upgrade_out" | awk -F= '/^PROTOCOL_VERSION=/{print $2; exit}')
+  UPGRADED=$(printf '%s\n' "$upgrade_out" | awk -F= '/^UPGRADED=/{print $2; exit}')
+  [ -n "$PROTO_FROM_UP" ] && PROTOCOL_VERSION=$PROTO_FROM_UP
+  # after upgrade, index version is current when UPGRADED=true
+  if [ "$UPGRADED" = true ]; then
+    INDEX_VERSION=$PROTOCOL_VERSION
+  elif [ "$INDEX_VERSION" = none ] || [ -z "$INDEX_VERSION" ]; then
+    INDEX_VERSION=$PROTOCOL_VERSION
+  fi
 fi
 
 # --- 5. report ------------------------------------------------------------
@@ -116,3 +145,6 @@ printf 'HANDOFF_DIR=%s\n'    "$HANDOFF_DIR"
 printf 'IS_WORKTREE=%s\n'    "$IS_WORKTREE"
 printf 'LINKED=%s\n'         "$LINKED"
 printf 'CREATED_INDEX=%s\n'  "$CREATED_INDEX"
+printf 'INDEX_VERSION=%s\n'  "$INDEX_VERSION"
+printf 'PROTOCOL_VERSION=%s\n' "$PROTOCOL_VERSION"
+printf 'UPGRADED=%s\n'       "$UPGRADED"
