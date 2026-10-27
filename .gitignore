@@ -51,5 +51,7 @@
 .agents/skills
 .mcp.json
 
-# Eval workspace (skill-creator runs)
-yes-handoff-workspace/
+# Eval workspace (skill-creator runs); fixture scripts are tracked
+yes-handoff-workspace/*
+!yes-handoff-workspace/fixtures
+yes-handoff-workspace/fixtures/smoke-*

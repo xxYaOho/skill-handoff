@@ -8,7 +8,7 @@
 
 Agent **不要**手改 blockquote 来「对齐新协议」——走 init/upgrade。日常交接仍禁止改写 blockquote；**唯一例外**是上述脚本升级。
 
-对照只比到 minor（`0.5.0` skill 元数据对应协议 `0.5`）。
+对照只比到 minor（`0.5.1` skill 元数据对应协议 `0.5`）。
 
 ## 代际摘要
 
